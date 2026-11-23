@@ -5,9 +5,9 @@ from typing import Annotated
 
 import typer
 
-from sgbridge import proxy
-from sgbridge.deploy import DeployError, Deployment, names
-from sgbridge.profiles import list_profiles, load_profile
+from byom import proxy
+from byom.deploy import DeployError, Deployment, names
+from byom.profiles import list_profiles, load_profile
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, pretty_exceptions_enable=False,
                   help="Deploy SGLang and put Claude Code (and friends) in front of it.")
@@ -41,18 +41,18 @@ def deploy(
     prof = load_profile(profile)
     name = name or prof.name
     if target == "docker":
-        from sgbridge.deploy import docker
+        from byom.deploy import docker
 
         dep = docker.up(prof, name, context=context, port=port, public=public)
     elif target == "modal":
-        from sgbridge.deploy import modal
+        from byom.deploy import modal
 
         dep = modal.up(prof, name, region=region)
     else:
         raise DeployError(f"unknown target {target!r}; use docker or modal")
     typer.secho(f"\n{dep.name} is up at {dep.url}", fg="green")
     typer.echo("The first request after idle waits for the GPU to start (a few minutes).")
-    typer.echo("Claude Code settings (also: `sgbridge env " + dep.name + "`):\n")
+    typer.echo("Claude Code settings (also: `byom env " + dep.name + "`):\n")
     typer.echo(dep.claude_code_env())
 
 
@@ -90,10 +90,10 @@ def list_() -> None:
 
 def _target(dep: Deployment) -> ModuleType:
     if dep.target == "docker":
-        from sgbridge.deploy import docker
+        from byom.deploy import docker
 
         return docker
-    from sgbridge.deploy import modal
+    from byom.deploy import modal
 
     return modal
 

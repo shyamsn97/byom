@@ -11,22 +11,22 @@ from typing import Any
 
 import yaml
 
-from sgbridge import __version__
-from sgbridge.deploy import (
+from byom import __version__
+from byom.deploy import (
     DeployError,
     Deployment,
     api_key_for,
     local_checkout,
 )
-from sgbridge.profiles import Profile
+from byom.profiles import Profile
 
-HF_CACHE_VOLUME = "sgbridge-hf-cache"
+HF_CACHE_VOLUME = "byom-hf-cache"
 
 
 def render_compose(profile: Profile, *, port: int = 8080, public: bool = False,
                    hf_cache: str = HF_CACHE_VOLUME,
                    build_root: Path | None = None) -> dict[str, Any]:
-    proxy_cmd = ["sgbridge", "serve", "--upstream", "http://sglang:30000", "--host", "0.0.0.0",
+    proxy_cmd = ["byom", "serve", "--upstream", "http://sglang:30000", "--host", "0.0.0.0",
                  "--port", "8080", "--hold", str(profile.startup_timeout_min * 60)]
     if profile.drop_thinking:
         proxy_cmd.append("--drop-thinking")
@@ -39,12 +39,12 @@ def render_compose(profile: Profile, *, port: int = 8080, public: bool = False,
         proxy["build"] = {"context": str(build_root), "dockerfile": "docker/proxy.Dockerfile"}
     else:
         proxy["build"] = {"context": ".", "dockerfile_inline": (
-            f"FROM python:3.12-slim\nRUN pip install --no-cache-dir sgbridge=={__version__}\n")}
+            f"FROM python:3.12-slim\nRUN pip install --no-cache-dir byom=={__version__}\n")}
     compose: dict[str, Any] = {
         "services": {
             "sglang": {
                 "image": profile.image,
-                "command": [*profile.sglang_command(), "--api-key", "${SGB_API_KEY}"],
+                "command": [*profile.sglang_command(), "--api-key", "${BYOM_API_KEY}"],
                 "env_file": [".env"],
                 "volumes": [f"{hf_cache}:/root/.cache/huggingface"],
                 "ipc": "host",
@@ -75,7 +75,7 @@ def up(profile: Profile, name: str, *, context: str | None = None, port: int = 8
     compose = render_compose(profile, port=port, public=public, hf_cache=hf_cache,
                              build_root=local_checkout())
     (dep.dir / "compose.yaml").write_text(yaml.safe_dump(compose, sort_keys=False, width=1000))
-    env_lines = [f"SGB_API_KEY={dep.api_key}"]
+    env_lines = [f"BYOM_API_KEY={dep.api_key}"]
     if token := os.environ.get("HF_TOKEN"):
         env_lines.append(f"HF_TOKEN={token}")
     fd = os.open(dep.dir / ".env", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
@@ -104,4 +104,4 @@ def _compose(dep: Deployment, *args: str) -> None:
 def _base(dep: Deployment) -> list[str]:
     context = dep.extra.get("context")
     return ["docker", *(["--context", context] if context else []), "compose",
-            "-p", f"sgbridge-{dep.name}", "--project-directory", str(dep.dir)]
+            "-p", f"byom-{dep.name}", "--project-directory", str(dep.dir)]

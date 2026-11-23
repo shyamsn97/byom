@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # Deploy Qwen3-Coder-30B on a Modal H100 and have Claude Code build a small tested program with it.
 #
-#   pip install 'sgbridge[modal]' && modal setup
+#   pip install 'byom[modal]' && modal setup
 #   bash examples/claude_code_qwen.sh
 #
-# The GPU scales to zero after 20 idle minutes; `sgbridge down qwen3-coder-30b` removes everything.
+# The GPU scales to zero after 20 idle minutes; `byom down qwen3-coder-30b` removes everything.
 set -euo pipefail
 
 NAME=qwen3-coder-30b
 
-if ! sgbridge env "$NAME" >/dev/null 2>&1; then
-  sgbridge deploy modal --profile "$NAME"
+if ! byom env "$NAME" >/dev/null 2>&1; then
+  byom deploy modal --profile "$NAME"
 fi
-eval "$(sgbridge env "$NAME")"
+eval "$(byom env "$NAME")"
 
 work=$(mktemp -d)
 cd "$work"

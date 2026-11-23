@@ -10,7 +10,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-STATE_DIR = Path(os.environ.get("XDG_STATE_HOME", "~/.local/state")).expanduser() / "sgbridge"
+STATE_DIR = Path(os.environ.get("XDG_STATE_HOME", "~/.local/state")).expanduser() / "byom"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -75,7 +75,7 @@ def api_key_for(name: str) -> str:
     try:
         return Deployment.load(name).api_key
     except DeployError:
-        return "sk-sgb-" + secrets.token_urlsafe(24)
+        return "sk-byom-" + secrets.token_urlsafe(24)
 
 
 def local_checkout() -> Path | None:

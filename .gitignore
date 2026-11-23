@@ -13,3 +13,6 @@ build/
 
 # private working notes
 docs/internal/
+
+# example output
+d1_snake.gif

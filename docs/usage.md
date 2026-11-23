@@ -7,8 +7,8 @@ A deployment is one URL that serves both APIs SGLang speaks:
 | Anthropic Messages | `<url>` | Claude Code, the `anthropic` SDK |
 | OpenAI Chat Completions | `<url>/v1` | the `openai` SDK, Cursor, most other tools |
 
-Both take the `sk-sgb-...` key and the profile's served model name (`qwen3-coder` for the bundled
-profile). `sgbridge env NAME` prints all three; in Python, `Deployment.load(NAME)` has them as
+Both take the `sk-byom-...` key and the profile's served model name (`qwen3-coder` for the bundled
+profile). `byom env NAME` prints all three; in Python, `Deployment.load(NAME)` has them as
 `.url`, `.api_key` and `.model`.
 
 The first request after the GPU has been idle waits for it to boot (2-4 minutes on Modal) instead
@@ -17,7 +17,7 @@ of failing, so give clients a long timeout (`timeout=900` below).
 ## Claude Code
 
 ```bash
-eval "$(sgbridge env qwen3-coder-30b)"
+eval "$(byom env qwen3-coder-30b)"
 claude
 ```
 
@@ -28,7 +28,7 @@ write and test a small program headlessly.
 
 ```python
 from openai import OpenAI
-from sgbridge.deploy import Deployment
+from byom.deploy import Deployment
 
 dep = Deployment.load("qwen3-coder-30b")
 client = OpenAI(base_url=f"{dep.url}/v1", api_key=dep.api_key, timeout=900)
@@ -109,7 +109,7 @@ Tool use takes `tools=[{"name": ..., "description": ..., "input_schema": {...}}]
 ## curl
 
 ```bash
-eval "$(sgbridge env qwen3-coder-30b)"
+eval "$(byom env qwen3-coder-30b)"
 curl "$ANTHROPIC_BASE_URL/v1/chat/completions" \
   -H "Authorization: Bearer $ANTHROPIC_AUTH_TOKEN" -H "content-type: application/json" \
   -d '{"model": "qwen3-coder", "messages": [{"role": "user", "content": "Hi"}]}'

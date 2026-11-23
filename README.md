@@ -1,19 +1,19 @@
-# sgbridge
+# byom
 
-Run Claude Code on an open model. sgbridge deploys [SGLang](https://github.com/sgl-project/sglang)
-on Modal or Docker and puts a small proxy in front of it that smooths over the few places where
-Claude Code and SGLang disagree.
+Bring your own model to Claude Code and other coding agents. byom deploys
+[SGLang](https://github.com/sgl-project/sglang) on Modal or Docker and puts a small proxy in front
+of it that smooths over the few places where Claude Code and SGLang disagree.
 
 ```bash
-pip install 'sgbridge[modal]'
-sgbridge deploy modal --profile qwen3-coder-30b
+pip install 'byom[modal]'
+byom deploy modal --profile qwen3-coder-30b
 ```
 
 `deploy` prints the environment variables for Claude Code:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://<you>--sgbridge-qwen3-coder-30b-proxy.us-east.modal.direct
-export ANTHROPIC_AUTH_TOKEN=sk-sgb-...
+export ANTHROPIC_BASE_URL=https://<you>--byom-qwen3-coder-30b-proxy.us-east.modal.direct
+export ANTHROPIC_AUTH_TOKEN=sk-byom-...
 export ANTHROPIC_MODEL=qwen3-coder
 ...
 claude
@@ -24,21 +24,21 @@ only for the GPU.
 
 ## Targets
 
-**Modal** (`sgbridge deploy modal`): the GPU server scales to zero after 20 idle minutes, and a
+**Modal** (`byom deploy modal`): the GPU server scales to zero after 20 idle minutes, and a
 small always-on CPU proxy keeps the URL stable. The first request after idle waits for the GPU to
 boot (about 4 minutes with cached weights) instead of failing. Needs `modal setup` first.
 
-**Docker** (`sgbridge deploy docker`): SGLang and the proxy as a Compose project on an NVIDIA
+**Docker** (`byom deploy docker`): SGLang and the proxy as a Compose project on an NVIDIA
 machine, reachable at `http://127.0.0.1:8080`. Use `--context <docker context>` to deploy to a
 remote GPU box from your laptop.
 
-**Your own SGLang server**: `sgbridge serve --upstream http://localhost:30000 --drop-thinking`.
+**Your own SGLang server**: `byom serve --upstream http://localhost:30000 --drop-thinking`.
 
 ```bash
-sgbridge list          # deployments and profiles
-sgbridge env NAME      # print the Claude Code settings again
-sgbridge logs NAME -f
-sgbridge down NAME
+byom list          # deployments and profiles
+byom env NAME      # print the Claude Code settings again
+byom logs NAME -f
+byom down NAME
 ```
 
 Gated models need `HF_TOKEN` set when you deploy.
@@ -81,7 +81,7 @@ too, including streaming, structured outputs and tool calls:
 
 ```python
 from openai import OpenAI
-from sgbridge.deploy import Deployment
+from byom.deploy import Deployment
 
 dep = Deployment.load("qwen3-coder-30b")
 client = OpenAI(base_url=f"{dep.url}/v1", api_key=dep.api_key, timeout=900)
@@ -94,16 +94,26 @@ for chunk in client.chat.completions.create(
         print(chunk.choices[0].delta.content, end="")
 ```
 
-[docs/usage.md](https://github.com/shyamsn97/sgbridge/blob/main/docs/usage.md) covers the OpenAI and Anthropic SDKs, structured outputs, tool
-calls, curl and Cursor. Runnable versions are in [examples/](https://github.com/shyamsn97/sgbridge/tree/main/examples):
+[docs/usage.md](https://github.com/shyamsn97/byom/blob/main/docs/usage.md) covers the OpenAI and Anthropic SDKs, structured outputs, tool
+calls, curl and Cursor. Runnable versions are in [examples/](https://github.com/shyamsn97/byom/tree/main/examples):
 
-- [`claude_code_qwen.sh`](https://github.com/shyamsn97/sgbridge/blob/main/examples/claude_code_qwen.sh): deploy, then have Claude Code write and
+- [`claude_code_qwen.sh`](https://github.com/shyamsn97/byom/blob/main/examples/claude_code_qwen.sh): deploy, then have Claude Code write and
   test a small program.
-- [`openai_sdk.py`](https://github.com/shyamsn97/sgbridge/blob/main/examples/openai_sdk.py): chat, streaming, structured outputs, JSON mode, tool
+- [`openai_sdk.py`](https://github.com/shyamsn97/byom/blob/main/examples/openai_sdk.py): chat, streaming, structured outputs, JSON mode, tool
   calls.
-- [`anthropic_sdk.py`](https://github.com/shyamsn97/sgbridge/blob/main/examples/anthropic_sdk.py): messages, streaming, tool use.
+- [`anthropic_sdk.py`](https://github.com/shyamsn97/byom/blob/main/examples/anthropic_sdk.py): messages, streaming, tool use.
+- [`d1_snake.py`](https://github.com/shyamsn97/byom/blob/main/examples/d1_snake.py): LiquidAI's
+  d1-2B decision model playing snake from rendered frames on a Modal GPU
+  (`modal run examples/d1_snake.py`). d1 doesn't generate text, so it runs in Transformers
+  rather than through byom.
 
 `make live NAME=<deployment>` runs all of these checks against a deployment as tests.
+
+## Agent skill
+
+[`skills/byom/SKILL.md`](https://github.com/shyamsn97/byom/blob/main/skills/byom/SKILL.md) teaches
+coding agents to deploy and connect to byom. Copy the `skills/byom` folder into
+`~/.claude/skills/` for Claude Code or `~/.cursor/skills/` for Cursor.
 
 ## Development
 

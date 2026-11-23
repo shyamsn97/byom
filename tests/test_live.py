@@ -1,8 +1,8 @@
 """End-to-end checks against a real deployment, through the OpenAI and Anthropic SDKs.
 
-    SGB_LIVE=qwen3-coder-30b uv run pytest tests/test_live.py -v
+    BYOM_LIVE=qwen3-coder-30b uv run pytest tests/test_live.py -v
 
-Skipped unless SGB_LIVE names a deployment (see `sgbridge list`).
+Skipped unless BYOM_LIVE names a deployment (see `byom list`).
 """
 
 from __future__ import annotations
@@ -15,10 +15,10 @@ import openai
 import pytest
 from pydantic import BaseModel
 
-from sgbridge.deploy import Deployment
+from byom.deploy import Deployment
 
-NAME = os.environ.get("SGB_LIVE")
-pytestmark = pytest.mark.skipif(not NAME, reason="set SGB_LIVE=<deployment> to run")
+NAME = os.environ.get("BYOM_LIVE")
+pytestmark = pytest.mark.skipif(not NAME, reason="set BYOM_LIVE=<deployment> to run")
 
 READ_FILE = {
     "name": "read_file",

@@ -1,7 +1,7 @@
 """Messages, streaming and tool use through the Anthropic SDK (the API Claude Code speaks).
 
-    pip install sgbridge anthropic
-    sgbridge deploy modal --profile qwen3-coder-30b
+    pip install byom anthropic
+    byom deploy modal --profile qwen3-coder-30b
     python examples/anthropic_sdk.py [deployment-name]
 """
 
@@ -9,7 +9,7 @@ import sys
 
 from anthropic import Anthropic
 
-from sgbridge.deploy import Deployment
+from byom.deploy import Deployment
 
 dep = Deployment.load(sys.argv[1] if len(sys.argv) > 1 else "qwen3-coder-30b")
 client = Anthropic(base_url=dep.url, api_key=dep.api_key, timeout=900)

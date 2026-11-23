@@ -18,7 +18,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse
 from starlette.routing import Route
 
-log = logging.getLogger("sgbridge")
+log = logging.getLogger("byom")
 
 HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers",

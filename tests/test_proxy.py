@@ -7,7 +7,7 @@ from collections.abc import AsyncIterator
 import httpx
 import pytest
 
-from sgbridge.proxy import ATTRIBUTION_PREFIX, create_app, fix_request
+from byom.proxy import ATTRIBUTION_PREFIX, create_app, fix_request
 
 ATTR = f"{ATTRIBUTION_PREFIX} cc_version=2.1.3; cch=abc;"
 
@@ -44,7 +44,7 @@ def _fast_retries(monkeypatch: pytest.MonkeyPatch) -> None:
     async def no_sleep(_: float) -> None:
         return None
 
-    monkeypatch.setattr("sgbridge.proxy.asyncio.sleep", no_sleep)
+    monkeypatch.setattr("byom.proxy.asyncio.sleep", no_sleep)
 
 
 async def test_passes_bytes_through_untouched() -> None:

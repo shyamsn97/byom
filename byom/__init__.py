@@ -1,6 +1,6 @@
 from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = version("sgbridge")
+    __version__ = version("byom")
 except PackageNotFoundError:
     __version__ = "0.0.0"

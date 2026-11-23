@@ -9,13 +9,13 @@ test:
 	uv run pytest
 
 live:  ## end-to-end tests against a deployment: make live NAME=<deployment>
-	SGB_LIVE=$(NAME) uv run pytest tests/test_live.py -v
+	BYOM_LIVE=$(NAME) uv run pytest tests/test_live.py -v
 
 lint:
-	uv run ruff check sgbridge tests examples
+	uv run ruff check byom tests examples
 	uv run mypy
 
 check: lint test
 
 image:  ## build the proxy image from this checkout
-	docker build -f docker/proxy.Dockerfile -t sgbridge:local .
+	docker build -f docker/proxy.Dockerfile -t byom:local .

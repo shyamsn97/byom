@@ -1,4 +1,4 @@
-"""Deploy to Modal: create the secret, `modal deploy` modal_app.py, download the weights."""
+"""Deploy to Modal: create the secret, `modal deploy` app.py, download the weights."""
 
 from __future__ import annotations
 
@@ -11,9 +11,9 @@ import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 
-from sgbridge import __version__
-from sgbridge.deploy import DeployError, Deployment, api_key_for, local_checkout
-from sgbridge.profiles import Profile
+from byom import __version__
+from byom.deploy import DeployError, Deployment, api_key_for, local_checkout
+from byom.profiles import Profile
 
 # Older Modal image builders install modal's own deps (pydantic 1.x) into registry images,
 # which breaks SGLang.
@@ -24,11 +24,11 @@ def up(profile: Profile, name: str, *, region: str = "us-east") -> Deployment:
     try:
         import modal
     except ImportError:
-        raise DeployError("the modal package is not installed: pip install 'sgbridge[modal]'") \
+        raise DeployError("the modal package is not installed: pip install 'byom[modal]'") \
             from None
-    app_name = f"sgbridge-{name}"
+    app_name = f"byom-{name}"
     api_key = api_key_for(name)
-    secret = {"SGB_API_KEY": api_key}
+    secret = {"BYOM_API_KEY": api_key}
     if token := os.environ.get("HF_TOKEN"):
         secret["HF_TOKEN"] = token
     modal.Secret.objects.delete(app_name, allow_missing=True)
@@ -51,14 +51,14 @@ def up(profile: Profile, name: str, *, region: str = "us-east") -> Deployment:
         "modal_version": modal.__version__,
     }
     with tempfile.TemporaryDirectory() as tmp:
-        app_file = Path(tmp) / f"sgbridge_{name.replace('-', '_')}.py"
-        shutil.copy(Path(__file__).with_name("modal_app.py"), app_file)
-        env = {**os.environ, "SGB_MODAL_SPEC": json.dumps(spec),
+        app_file = Path(tmp) / f"byom_{name.replace('-', '_')}.py"
+        shutil.copy(Path(__file__).with_name("app.py"), app_file)
+        env = {**os.environ, "BYOM_MODAL_SPEC": json.dumps(spec),
                "MODAL_IMAGE_BUILDER_VERSION": IMAGE_BUILDER_VERSION}
         if subprocess.run([sys.executable, "-m", "modal", "deploy", str(app_file)],
                           env=env).returncode != 0:
             raise DeployError("modal deploy failed")
-    print("downloading weights to the sgbridge-hf-cache volume...", flush=True)
+    print("downloading weights to the byom-hf-cache volume...", flush=True)
     modal.Function.from_name(app_name, "prefetch").remote()
     url = modal.Server.from_name(app_name, "Proxy").get_url()
     if not url:

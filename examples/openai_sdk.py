@@ -1,7 +1,7 @@
 """Chat, streaming, structured outputs and tool calls through the OpenAI SDK.
 
-    pip install sgbridge openai pydantic
-    sgbridge deploy modal --profile qwen3-coder-30b
+    pip install byom openai pydantic
+    byom deploy modal --profile qwen3-coder-30b
     python examples/openai_sdk.py [deployment-name]
 """
 
@@ -11,7 +11,7 @@ import sys
 from openai import OpenAI
 from pydantic import BaseModel
 
-from sgbridge.deploy import Deployment
+from byom.deploy import Deployment
 
 dep = Deployment.load(sys.argv[1] if len(sys.argv) > 1 else "qwen3-coder-30b")
 # A long timeout covers the first request after idle, which waits for the GPU to boot.

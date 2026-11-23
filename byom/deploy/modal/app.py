@@ -1,6 +1,6 @@
 """Modal app for one deployment: a scale-to-zero SGLang server behind an always-on proxy server.
 
-`modal deploy` runs a copy of this file outside the package, configured by SGB_MODAL_SPEC. It may
+`modal deploy` runs a copy of this file outside the package, configured by BYOM_MODAL_SPEC. It may
 only import the stdlib and modal, because Modal also imports it inside the SGLang image.
 """
 
@@ -10,11 +10,11 @@ import subprocess
 
 import modal
 
-SPEC_JSON = os.environ["SGB_MODAL_SPEC"]
+SPEC_JSON = os.environ["BYOM_MODAL_SPEC"]
 SPEC = json.loads(SPEC_JSON)
 # Not /root/.cache/huggingface: the SGLang image already has files there and Modal only mounts
 # volumes on empty paths.
-CACHE = "/sgb-cache"
+CACHE = "/byom-cache"
 CACHE_ENV = {
     "HF_HOME": CACHE,
     "HF_HUB_CACHE": f"{CACHE}/hub",
@@ -24,7 +24,7 @@ CACHE_ENV = {
 
 app = modal.App(SPEC["app"])
 secrets = [modal.Secret.from_name(SPEC["app"])]
-cache = modal.Volume.from_name("sgbridge-hf-cache", create_if_missing=True)
+cache = modal.Volume.from_name("byom-hf-cache", create_if_missing=True)
 
 proxy_image = modal.Image.debian_slim(python_version="3.12")
 if SPEC["local_root"]:
@@ -33,15 +33,15 @@ if SPEC["local_root"]:
         ignore=[".git", ".venv", "**/__pycache__", "docs", "tests"],
     ).run_commands("pip install --no-cache-dir /src")
 else:
-    proxy_image = proxy_image.uv_pip_install(f"sgbridge=={SPEC['version']}")
+    proxy_image = proxy_image.uv_pip_install(f"byom=={SPEC['version']}")
 proxy_image = proxy_image.uv_pip_install(
     f"modal=={SPEC['modal_version']}", "huggingface_hub[hf_xet]"
-).env({**CACHE_ENV, "SGB_MODAL_SPEC": SPEC_JSON})
+).env({**CACHE_ENV, "BYOM_MODAL_SPEC": SPEC_JSON})
 
 sglang_image = (
     modal.Image.from_registry(SPEC["image"])
     .entrypoint([])
-    .env({**CACHE_ENV, "HF_XET_HIGH_PERFORMANCE": "1", "SGB_MODAL_SPEC": SPEC_JSON})
+    .env({**CACHE_ENV, "HF_XET_HIGH_PERFORMANCE": "1", "BYOM_MODAL_SPEC": SPEC_JSON})
 )
 
 
@@ -61,7 +61,7 @@ class SGLang:
     @modal.enter()
     def start(self) -> None:
         self.proc = subprocess.Popen(
-            [*SPEC["command"], "--api-key", os.environ["SGB_API_KEY"]]
+            [*SPEC["command"], "--api-key", os.environ["BYOM_API_KEY"]]
         )
 
 
@@ -80,7 +80,7 @@ class Proxy:
         upstream = modal.Server.from_name(SPEC["app"], "SGLang").get_url()
         if not upstream:
             raise RuntimeError("could not resolve the SGLang server URL")
-        cmd = ["sgbridge", "serve", "--upstream", upstream, "--host", "0.0.0.0",
+        cmd = ["byom", "serve", "--upstream", upstream, "--host", "0.0.0.0",
                "--port", "8080", "--hold", str(SPEC["startup_s"])]
         if SPEC["drop_thinking"]:
             cmd.append("--drop-thinking")
