@@ -13,6 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+      - name: Tag matches pyproject version
+        run: |
+          version=$(uv version --short)
+          if [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
+            echo "release tag $GITHUB_REF_NAME doesn't match version $version in pyproject.toml"
+            exit 1
+          fi
       - run: uv sync --all-extras
       - run: make check
       - run: uv build

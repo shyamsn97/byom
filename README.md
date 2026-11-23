@@ -121,4 +121,8 @@ coding agents to deploy and connect to byom. Copy the `skills/byom` folder into
 make install   # uv sync
 make check     # ruff, mypy, pytest
 make live NAME=qwen3-coder-30b   # end-to-end tests against a real deployment
+make bump PART=minor             # bump the version in pyproject.toml (patch, minor or major)
 ```
+
+To release, commit the bump and publish a GitHub release tagged `v<version>`; the publish
+workflow checks the tag matches and uploads to PyPI.

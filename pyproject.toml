@@ -1,6 +1,6 @@
 [project]
 name = "byom"
-version = "0.1.0"
+version = "0.2.0"
 description = "Bring your own model to Claude Code: deploy SGLang on Modal or Docker, with a proxy in front."
 readme = "README.md"
 license = { file = "LICENSE" }

@@ -1,6 +1,7 @@
-.PHONY: install test live lint check image
+.PHONY: install test live lint check bump image
 .DEFAULT_GOAL := check
 NAME ?= qwen3-coder-30b
+PART ?= patch
 
 install:
 	uv sync --all-extras
@@ -16,6 +17,9 @@ lint:
 	uv run mypy
 
 check: lint test
+
+bump:  ## make bump PART=patch|minor|major, then release tag v<new version>
+	uv version --bump $(PART)
 
 image:  ## build the proxy image from this checkout
 	docker build -f docker/proxy.Dockerfile -t byom:local .

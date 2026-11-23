@@ -65,7 +65,7 @@ def test_modal_app_builds(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BYOM_MODAL_SPEC", json.dumps({
         "app": "byom-test", "image": p.image, "command": p.sglang_command(), "gpu": p.gpu,
         "model": p.model, "revision": p.revision, "startup_s": 1200, "idle_s": 1200,
-        "drop_thinking": True, "region": "us-east", "local_root": None, "version": "0.1.0",
+        "drop_thinking": True, "region": "us-east", "local_root": None, "version": "0.0.0",
         "modal_version": "1.6.4",
     }))
     app_file = Path(__file__).parents[1] / "byom" / "deploy" / "modal" / "app.py"
